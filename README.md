@@ -317,8 +317,8 @@ Each feature is developed on its own branch with a descriptive commit message, r
 | 🧭 Team Lead / Git Manager | Bilal Mughal | [@Bilalmughal-07](https://github.com/Bilalmughal-07) |
 | ⚙️ Backend / API Engineer | Abdul Azeem Hashmi | [@AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) |
 | 🗄️ Database Engineer | Abdul Azeem Hashmi | [@AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) |
-| 🎨 Frontend Engineer | Team Member 3 | ~ |
-| 🧪 QA / Documentation | Team Member 4 | ~ |
+| 🎨 Frontend Engineer | Emaan Ahmed | [@emaanahmed5](https://github.com/emaanahmed5) |
+| 🧪 QA / Documentation | Abdul Rafih Khan | [@RafihKhan-47](https://github.com/RafihKhan-47) |
 
 ---
 
