@@ -99,7 +99,7 @@ git checkout issue-1-backend-database-setup
 npm install
 ```
 
-4. **Approve SQLite3 build scripts** (if prompted)
+4. **Approve SQLite3 build scripts**
 
 ```bash
 npm approve-scripts sqlite3
