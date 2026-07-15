@@ -1,7 +1,26 @@
 const Ticket = require('../models/ticketModel');
 
-// Get all tickets
+// Get all tickets — supports optional ?status= and ?priority= query filters
 const getTickets = (req, res) => {
+    const { status, priority, keyword } = req.query;
+
+    // If a keyword is present, delegate to search
+    if (keyword && keyword.trim()) {
+        return Ticket.searchTickets(keyword.trim(), (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    }
+
+    // If status or priority filters are present, use filterTickets
+    if (status || priority) {
+        return Ticket.filterTickets(status || null, priority || null, (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    }
+
+    // Default: return all tickets
     Ticket.getAllTickets((err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
@@ -24,7 +43,16 @@ const createTicket = (req, res) => {
     if (!customer_id || !subject) {
         return res.status(400).json({ error: 'customer_id and subject are required' });
     }
-    Ticket.createTicket(customer_id, subject, description, priority, status, (err, id) => {
+    // Validate priority and status values
+    const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+    const validStatuses   = ['Open', 'In Progress', 'Closed'];
+    if (priority && !validPriorities.includes(priority)) {
+        return res.status(400).json({ error: `priority must be one of: ${validPriorities.join(', ')}` });
+    }
+    if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({ error: `status must be one of: ${validStatuses.join(', ')}` });
+    }
+    Ticket.createTicket(customer_id, subject, description, priority || 'Medium', status || 'Open', (err, id) => {
         if (err) return res.status(500).json({ error: err.message });
         res.status(201).json({ id, message: 'Ticket created' });
     });
@@ -37,9 +65,17 @@ const updateTicket = (req, res) => {
     if (!customer_id || !subject) {
         return res.status(400).json({ error: 'customer_id and subject are required' });
     }
+    const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+    const validStatuses   = ['Open', 'In Progress', 'Closed'];
+    if (priority && !validPriorities.includes(priority)) {
+        return res.status(400).json({ error: `priority must be one of: ${validPriorities.join(', ')}` });
+    }
+    if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({ error: `status must be one of: ${validStatuses.join(', ')}` });
+    }
     Ticket.updateTicket(id, customer_id, subject, description, priority, status, (err, changes) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (changes === 0) return res.status(404).json({ error: 'Ticket not found or no changes' });
+        if (changes === 0) return res.status(404).json({ error: 'Ticket not found or no changes made' });
         res.json({ message: 'Ticket updated' });
     });
 };
@@ -54,7 +90,7 @@ const deleteTicket = (req, res) => {
     });
 };
 
-// Search tickets by keyword
+// Search tickets by keyword (dedicated endpoint for backwards compat)
 const searchTickets = (req, res) => {
     const keyword = req.query.keyword || '';
     Ticket.searchTickets(keyword, (err, rows) => {

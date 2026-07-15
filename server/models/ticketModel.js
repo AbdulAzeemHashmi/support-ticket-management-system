@@ -6,7 +6,7 @@ const getAllTickets = (callback) => {
         SELECT tickets.*, customers.name AS customer_name 
         FROM tickets 
         JOIN customers ON tickets.customer_id = customers.id 
-        ORDER BY tickets.id
+        ORDER BY tickets.created_at DESC
     `;
     db.all(sql, callback);
 };
@@ -55,26 +55,56 @@ const deleteTicket = (id, callback) => {
     });
 };
 
-// Search tickets by keyword (subject or customer name)
+// Search tickets by keyword — searches subject, customer name, customer email, and ticket ID
 const searchTickets = (keyword, callback) => {
     const sql = `
         SELECT tickets.*, customers.name AS customer_name 
         FROM tickets 
         JOIN customers ON tickets.customer_id = customers.id 
-        WHERE tickets.subject LIKE ? OR customers.name LIKE ?
+        WHERE tickets.subject LIKE ?
+           OR customers.name  LIKE ?
+           OR customers.email LIKE ?
+           OR CAST(tickets.id AS TEXT) = ?
+        ORDER BY tickets.created_at DESC
     `;
     const pattern = `%${keyword}%`;
-    db.all(sql, [pattern, pattern], callback);
+    // Exact match on ID (no wildcards) so "1" does not match ticket "10", "11", etc.
+    db.all(sql, [pattern, pattern, pattern, keyword], callback);
 };
 
-// Get dashboard statistics (counts by status)
+// Filter tickets by status and/or priority
+const filterTickets = (status, priority, callback) => {
+    const conditions = [];
+    const params = [];
+
+    if (status) {
+        conditions.push('tickets.status = ?');
+        params.push(status);
+    }
+    if (priority) {
+        conditions.push('tickets.priority = ?');
+        params.push(priority);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const sql = `
+        SELECT tickets.*, customers.name AS customer_name 
+        FROM tickets 
+        JOIN customers ON tickets.customer_id = customers.id 
+        ${where}
+        ORDER BY tickets.created_at DESC
+    `;
+    db.all(sql, params, callback);
+};
+
+// Get dashboard statistics — keys match what dashboard.js expects
 const getStats = (callback) => {
     const sql = `
         SELECT 
-            COUNT(CASE WHEN status = 'Open' THEN 1 END) AS open_count,
-            COUNT(CASE WHEN status = 'In Progress' THEN 1 END) AS inprogress_count,
-            COUNT(CASE WHEN status = 'Closed' THEN 1 END) AS closed_count,
-            COUNT(*) AS total
+            COUNT(CASE WHEN status = 'Open'        THEN 1 END) AS open,
+            COUNT(CASE WHEN status = 'In Progress' THEN 1 END) AS inProgress,
+            COUNT(CASE WHEN status = 'Closed'      THEN 1 END) AS closed,
+            COUNT(*)                                            AS total
         FROM tickets
     `;
     db.get(sql, callback);
@@ -87,5 +117,6 @@ module.exports = {
     updateTicket,
     deleteTicket,
     searchTickets,
+    filterTickets,
     getStats
 };

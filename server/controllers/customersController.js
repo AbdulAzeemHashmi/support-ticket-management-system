@@ -1,5 +1,10 @@
 const Customer = require('../models/customerModel');
 
+/** Simple email format check */
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 // Get all customers
 const getCustomers = (req, res) => {
     Customer.getAllCustomers((err, rows) => {
@@ -24,8 +29,17 @@ const createCustomer = (req, res) => {
     if (!name || !email) {
         return res.status(400).json({ error: 'name and email are required' });
     }
-    Customer.createCustomer(name, email, phone, (err, id) => {
-        if (err) return res.status(500).json({ error: err.message });
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'A valid email address is required' });
+    }
+    Customer.createCustomer(name, email.toLowerCase(), phone || null, (err, id) => {
+        if (err) {
+            // UNIQUE constraint violation → 409 Conflict
+            if (err.message && err.message.includes('UNIQUE constraint failed')) {
+                return res.status(409).json({ error: 'A customer with this email already exists' });
+            }
+            return res.status(500).json({ error: err.message });
+        }
         res.status(201).json({ id, message: 'Customer created' });
     });
 };
@@ -37,8 +51,16 @@ const updateCustomer = (req, res) => {
     if (!name || !email) {
         return res.status(400).json({ error: 'name and email are required' });
     }
-    Customer.updateCustomer(id, name, email, phone, (err, changes) => {
-        if (err) return res.status(500).json({ error: err.message });
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'A valid email address is required' });
+    }
+    Customer.updateCustomer(id, name, email.toLowerCase(), phone || null, (err, changes) => {
+        if (err) {
+            if (err.message && err.message.includes('UNIQUE constraint failed')) {
+                return res.status(409).json({ error: 'A customer with this email already exists' });
+            }
+            return res.status(500).json({ error: err.message });
+        }
         if (changes === 0) return res.status(404).json({ error: 'Customer not found' });
         res.json({ message: 'Customer updated' });
     });

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Manage, search, and filter support tickets — Support Desk Ticket Management.">
+<title>Tickets · Support Desk</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="tickets">
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__mark">SD</div>
+      <div class="sidebar__title">Support Desk<small>Ticket Management</small></div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav__link" data-page="dashboard" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a class="nav__link" data-page="tickets" href="tickets.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/><path d="M13 6v12" stroke-dasharray="2 2"/></svg>
+        Tickets
+      </a>
+      <a class="nav__link" data-page="customers" href="customers.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M16.5 8.5a3 3 0 1 1 3.4 3M20 20a5.5 5.5 0 0 0-4-5.3"/></svg>
+        Customers
+      </a>
+    </nav>
+
+    <div class="sidebar__foot">CODOC Intern Programme<br>Assignment 3</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <p class="topbar__eyebrow">Manage</p>
+        <h1>Tickets</h1>
+      </div>
+      <button id="btnNewTicket" class="btn btn--brand">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        New Ticket
+      </button>
+    </div>
+
+    <section class="panel">
+      <!-- Search + filter toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="searchInput" type="search" class="input" placeholder="Search by subject, customer, email or ID…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="filterStatus">Status</label>
+          <select id="filterStatus" class="input">
+            <option value="">All statuses</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filterPriority">Priority</label>
+          <select id="filterPriority" class="input">
+            <option value="">All priorities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <button id="btnClearFilters" class="btn btn--ghost btn--sm" title="Clear all filters">
+          Clear
+        </button>
+      </div>
+
+      <!-- Results count -->
+      <p id="ticketCount" class="result-count"></p>
+
+      <div class="table-wrap">
+        <table class="data" id="ticketsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject</th>
+              <th>Customer</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ticketsBody">
+            <tr><td colspan="7"><div class="state">Loading tickets…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ── Create / Edit Ticket Modal ───────────────────────────────────────── -->
+<div class="modal-overlay" id="ticketModalOverlay" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle">
+  <div class="modal">
+    <div class="modal__head">
+      <h2 id="ticketModalTitle">New Ticket</h2>
+      <button class="modal__close" id="ticketModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="form-row" id="rowCustomer">
+        <label for="ticketCustomer">Customer <span class="req">*</span></label>
+        <select id="ticketCustomer" class="input">
+          <option value="">— Select customer —</option>
+        </select>
+        <span class="error-text" id="errCustomer">Please select a customer.</span>
+      </div>
+      <div class="form-row" id="rowSubject">
+        <label for="ticketSubject">Subject <span class="req">*</span></label>
+        <input id="ticketSubject" type="text" class="input" placeholder="Brief description of the issue" maxlength="200">
+        <span class="error-text" id="errSubject">Subject is required.</span>
+      </div>
+      <div class="form-row">
+        <label for="ticketDesc">Description</label>
+        <textarea id="ticketDesc" class="input" rows="4" placeholder="Detailed explanation of the issue…"></textarea>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row" id="rowPriority">
+          <label for="ticketPriority">Priority</label>
+          <select id="ticketPriority" class="input">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div class="form-row" id="rowStatus">
+          <label for="ticketStatus">Status</label>
+          <select id="ticketStatus" class="input">
+            <option value="Open" selected>Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--ghost" id="ticketModalCancel">Cancel</button>
+      <button class="btn btn--brand" id="ticketModalSave">Create Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── View Ticket Detail Modal ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="viewModalOverlay" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+  <div class="modal modal--wide">
+    <div class="modal__head">
+      <h2 id="viewModalTitle">Ticket Detail</h2>
+      <button class="modal__close" id="viewModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal__body" id="viewModalBody">
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--ghost" id="viewModalClose2">Close</button>
+      <button class="btn btn--ghost" id="viewModalEdit">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/tickets.js"></script>
+</body>
+</html>

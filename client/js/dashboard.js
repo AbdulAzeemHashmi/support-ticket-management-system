@@ -28,28 +28,16 @@ function renderPriorityBadge(priority) {
 async function loadStats() {
   try {
     const stats = await api.getTicketStats();
-    // Backend may return either {open, inProgress, closed} or an array of
-    // {status, count} rows — normalize both shapes defensively.
-    let open = 0, inProgress = 0, closed = 0;
+    // Backend returns { open, inProgress, closed, total }
+    const open       = stats?.open       ?? 0;
+    const inProgress = stats?.inProgress ?? 0;
+    const closed     = stats?.closed     ?? 0;
+    const total      = stats?.total      ?? (open + inProgress + closed);
 
-    if (Array.isArray(stats)) {
-      stats.forEach((row) => {
-        const status = (row.status || '').toLowerCase();
-        if (status === 'open') open = row.count;
-        else if (status === 'in progress') inProgress = row.count;
-        else if (status === 'closed') closed = row.count;
-      });
-    } else if (stats) {
-      open = stats.open ?? stats.Open ?? 0;
-      inProgress = stats.inProgress ?? stats['In Progress'] ?? 0;
-      closed = stats.closed ?? stats.Closed ?? 0;
-    }
-
-    const total = open + inProgress + closed;
-    document.querySelector('[data-stat="total"]').textContent = total;
-    document.querySelector('[data-stat="open"]').textContent = open;
+    document.querySelector('[data-stat="total"]').textContent    = total;
+    document.querySelector('[data-stat="open"]').textContent     = open;
     document.querySelector('[data-stat="inProgress"]').textContent = inProgress;
-    document.querySelector('[data-stat="closed"]').textContent = closed;
+    document.querySelector('[data-stat="closed"]').textContent   = closed;
   } catch (err) {
     showToast(err.message, 'error');
     document.querySelectorAll('.stub__value').forEach((el) => (el.textContent = '–'));

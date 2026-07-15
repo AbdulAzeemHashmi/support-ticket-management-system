@@ -1,8 +1,8 @@
 {
   "name": "support-ticket-management-system",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A lightweight helpdesk application for creating, tracking, and managing support tickets with priority and status tracking.",
+  "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js"
@@ -11,8 +11,8 @@
     "type": "git",
     "url": "git+https://github.com/Bilalmughal-07/support-ticket-management-system.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["helpdesk", "tickets", "sqlite", "express"],
+  "author": "Bilal Mughal",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/Bilalmughal-07/support-ticket-management-system#readme",
   "dependencies": {
-    "body-parser": "^2.3.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "sqlite3": "^6.0.1"
