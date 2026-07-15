@@ -34,6 +34,7 @@ async function apiRequest(path, options = {}) {
 const api = {
   // Tickets
   getTickets: () => apiRequest('/tickets'),
+  getTicketsFiltered: (qs) => apiRequest(`/tickets?${qs}`),
   getTicket: (id) => apiRequest(`/tickets/${id}`),
   getTicketStats: () => apiRequest('/tickets/stats'),
   searchTickets: (keyword) => apiRequest(`/tickets/search?keyword=${encodeURIComponent(keyword)}`),
