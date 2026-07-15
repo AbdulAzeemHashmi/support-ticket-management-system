@@ -82,7 +82,7 @@ async function loadTickets() {
       if (state.priority) params.set('priority', state.priority);
       const qs = params.toString();
       tickets = await (qs
-        ? apiRequest(`/tickets?${qs}`)
+        ? api.getTicketsFiltered(qs)
         : api.getTickets());
     }
 
