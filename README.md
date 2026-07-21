@@ -310,7 +310,7 @@ All endpoints are prefixed with `/api`.
 
 ```bash
 # Clone the repository
-git clone https://github.com/AbdulAzeemHashmi/support-ticket-management-system.git
+git clone https://github.com/Bilalmughal-07/support-ticket-management-system.git
 cd support-ticket-management-system
 
 # Install dependencies
